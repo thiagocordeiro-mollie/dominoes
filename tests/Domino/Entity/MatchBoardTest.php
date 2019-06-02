@@ -61,7 +61,7 @@ class MatchBoardTest extends TestCase
     {
         $this->boardStock->method('getFirst')->willReturn(new Tile(1, 3));
 
-        $face = $this->matchBoard->getLeftFace();
+        $face = $this->matchBoard->getFirst();
 
         $this->assertEquals(1, $face);
     }
@@ -70,7 +70,7 @@ class MatchBoardTest extends TestCase
     {
         $this->boardStock->method('getLast')->willReturn(new Tile(2, 6));
 
-        $face = $this->matchBoard->getRightFace();
+        $face = $this->matchBoard->getLast();
 
         $this->assertEquals(6, $face);
     }

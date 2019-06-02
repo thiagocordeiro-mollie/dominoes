@@ -33,26 +33,14 @@ class MatchBoard
         return $player;
     }
 
-    public function getLeftFace(): ?int
+    public function getFirst(): ?Tile
     {
-        $first = $this->board->getFirst();
-
-        if (!$first) {
-            return null;
-        }
-
-        return $first->getLeft();
+        return $this->board->getFirst();
     }
 
-    public function getRightFace(): ?int
+    public function getLast(): ?Tile
     {
-        $last = $this->board->getLast();
-
-        if (!$last) {
-            return null;
-        }
-
-        return $last->getRight();
+        return $this->board->getLast();
     }
 
     public function giveTileToPlayer(Player $player): bool
@@ -72,29 +60,35 @@ class MatchBoard
         return true;
     }
 
-    public function place(Tile $tile): void
+    public function place(Tile $tile): ?Tile
     {
         if ($this->board->isEmpty()) {
             $this->board->append($tile);
-            return;
+            return null;
         }
 
-        $left = $this->getLeftFace();
-        $right = $this->getRightFace();
+        $first = $this->getFirst();
+        $last = $this->getLast();
 
-        if ($tile->connectsOnRight($right)) {
+        if ($tile->connectsOnRight($last->getRight())) {
             $this->board->append($tile);
-            return;
+            return $last;
         }
 
-        if (!$tile->connectsOnLeft($left)) {
+        if (!$tile->connectsOnLeft($first->getLeft())) {
             throw new Exception('Unable to place the tile');
         }
 
         $this->board->prepend($tile);
+
+        return $first;
     }
 
-    public function getBoardStack():array {
+    /**
+     * @return Tile[]
+     */
+    public function getPlayed(): array
+    {
         return $this->board->getAll();
     }
 }

@@ -38,10 +38,12 @@ class MatchCommand extends Command
 
         $match = new Match($board);
 
-        $result = $match->play();
+        $events = $match->play();
 
-        dd($result);
+        foreach ($events as $event) {
+            $output->writeln((string) $event);
+        }
 
-        return 0;
+        return null;
     }
 }

@@ -70,4 +70,9 @@ class Tile
 
         return false;
     }
+
+    public function __toString(): string
+    {
+        return sprintf('<%s:%s>', $this->getLeft(), $this->getRight());
+    }
 }
