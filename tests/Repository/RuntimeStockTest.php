@@ -109,4 +109,34 @@ class RuntimeStockTest extends TestCase
 
         $this->assertCount(4, $stock->getAll());
     }
+
+    public function testShouldBeEmptyAfterGettingLastTile(): void
+    {
+        $stock = new RuntimeStock();
+        $stock->setTiles([new Tile(1, 2)]);
+
+        $stock->popNext();
+
+        $this->assertTrue($stock->isEmpty());
+    }
+
+    public function testShouldEmpty(): void
+    {
+        $stock = new RuntimeStock();
+        $stock->setTiles([new Tile(1, 2), new Tile(1, 4)]);
+
+        $stock->popNext();
+
+        $this->assertFalse($stock->isEmpty());
+    }
+
+    public function testSumPoints(): void
+    {
+        $stock = new RuntimeStock();
+        $stock->setTiles([new Tile(1, 2), new Tile(1, 4), new Tile(5, 5)]);
+
+        $total = $stock->sumPoints();
+
+        $this->assertEquals(18, $total);
+    }
 }

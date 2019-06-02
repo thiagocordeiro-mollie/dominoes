@@ -75,4 +75,9 @@ class Tile
     {
         return sprintf('<%s:%s>', $this->getLeft(), $this->getRight());
     }
+
+    public function points(): int
+    {
+        return $this->left + $this->right;
+    }
 }

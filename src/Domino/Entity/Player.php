@@ -41,4 +41,14 @@ class Player
     {
         return $this->stock->isEmpty();
     }
+
+    public function getTilePoints(): int
+    {
+        return $this->stock->sumPoints();
+    }
+
+    public function __toString(): string
+    {
+        return $this->name;
+    }
 }

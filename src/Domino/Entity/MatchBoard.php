@@ -91,4 +91,23 @@ class MatchBoard
     {
         return $this->boardStack->getAll();
     }
+
+    /**
+     * @return Player[]
+     */
+    public function getWinnerByPoints(): array
+    {
+        $pointsMap = [];
+
+        foreach ($this->players as $player) {
+            $points = $player->getTilePoints();
+
+            $pointsMap[$points] = $pointsMap[$points] ?? [];
+            $pointsMap[$points][] = $player;
+        }
+
+        $lower = min(array_keys($pointsMap));
+
+        return $pointsMap[$lower];
+    }
 }

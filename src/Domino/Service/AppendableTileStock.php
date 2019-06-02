@@ -20,4 +20,6 @@ interface AppendableTileStock
     public function getAll(): array;
 
     public function isEmpty(): bool;
+
+    public function sumPoints(): int;
 }

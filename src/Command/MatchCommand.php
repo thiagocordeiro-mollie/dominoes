@@ -30,12 +30,9 @@ class MatchCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output): ?int
     {
         $boardStock = $this->stockFactory->create($this->tileFactory->create());
-
         $alice = new Player('Alice', $this->stockFactory->create($boardStock->popMany(7)));
         $bob = new Player('Bob', $this->stockFactory->create($boardStock->popMany(7)));
-
         $board = new MatchBoard([$alice, $bob], $boardStock, $this->stockFactory->create([]));
-
         $match = new Match($board);
 
         $events = $match->play();

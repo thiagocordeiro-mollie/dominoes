@@ -18,14 +18,22 @@ class MatchBoardTest extends TestCase
     /** @var MatchBoard */
     private $matchBoard;
 
+    /** @var RemovableTileStock|MockObject */
+    private $playerAStock;
+
+    /** @var RemovableTileStock|MockObject */
+    private $playerBStock;
+
     protected function setUp(): void
     {
         $this->boardStock = $this->createMock(AppendableTileStock::class);
+        $this->playerAStock = $this->createMock(RemovableTileStock::class);
+        $this->playerBStock = $this->createMock(RemovableTileStock::class);
 
         $stock = $this->createMock(RemovableTileStock::class);
         $players = [
-            new Player('A', $this->createMock(RemovableTileStock::class)),
-            new Player('B', $this->createMock(RemovableTileStock::class)),
+            new Player('A', $this->playerAStock),
+            new Player('B', $this->playerBStock),
         ];
 
         $this->matchBoard = new MatchBoard($players, $stock, $this->boardStock);
@@ -112,5 +120,27 @@ class MatchBoardTest extends TestCase
         $this->boardStock->expects($this->once())->method('append');
 
         $this->matchBoard->placeTile(new Tile(4, 2));
+    }
+
+    public function testShouldGetPlayerAAsWinnerByPoints(): void
+    {
+        $this->playerAStock->method('sumPoints')->willReturn(6);
+        $this->playerBStock->method('sumPoints')->willReturn(9);
+
+        $winners = $this->matchBoard->getWinnerByPoints();
+
+        $expected = [new Player('A', $this->playerAStock)];
+        $this->assertEquals($expected, $winners);
+    }
+
+    public function testShouldGetPlayerAAndBAsWinnersBySamePointsAmount(): void
+    {
+        $this->playerAStock->method('sumPoints')->willReturn(5);
+        $this->playerBStock->method('sumPoints')->willReturn(5);
+
+        $winners = $this->matchBoard->getWinnerByPoints();
+
+        $expected = [new Player('A', $this->playerAStock), new Player('B', $this->playerBStock)];
+        $this->assertEquals($expected, $winners);
     }
 }

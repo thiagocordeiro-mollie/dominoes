@@ -91,4 +91,15 @@ class RuntimeStock implements RemovableTileStock
     {
         return empty($this->tiles);
     }
+
+    public function sumPoints(): int
+    {
+        $points = 0;
+
+        foreach ($this->tiles as $tile) {
+            $points += $tile->points();
+        }
+
+        return $points;
+    }
 }

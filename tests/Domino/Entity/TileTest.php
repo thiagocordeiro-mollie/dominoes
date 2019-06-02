@@ -37,4 +37,23 @@ class TileTest extends TestCase
             'is not connectable' => ['left' => 3, 'right' => 4, 'expected' => false],
         ];
     }
+
+    /**
+     * @dataProvider countPointsDataset
+     */
+    public function testCountPoints(Tile $tile, int $expected): void
+    {
+        $this->assertEquals($expected, $tile->points());
+    }
+
+    public function countPointsDataset(): array
+    {
+        return [
+            '0 points' => ['tile' => new Tile(0, 0), 'points' => 0],
+            '1 point' => ['tile' => new Tile(1, 0), 'points' => 1],
+            '2 points' => ['tile' => new Tile(1, 1), 'points' => 2],
+            '4 points' => ['tile' => new Tile(1, 3), 'points' => 4],
+            '8 points' => ['tile' => new Tile(6, 2), 'points' => 8],
+        ];
+    }
 }
