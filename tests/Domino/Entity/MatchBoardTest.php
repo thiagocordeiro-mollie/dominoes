@@ -1,0 +1,146 @@
+<?php declare(strict_types=1);
+
+namespace App\Tests\Domino\Entity;
+
+use App\Domino\Entity\MatchBoard;
+use App\Domino\Entity\Player;
+use App\Domino\Entity\Tile;
+use App\Domino\Service\AppendableTileStock;
+use App\Domino\Service\RemovableTileStock;
+use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\TestCase;
+
+class MatchBoardTest extends TestCase
+{
+    /** @var RemovableTileStock|MockObject */
+    private $boardStock;
+
+    /** @var MatchBoard */
+    private $matchBoard;
+
+    /** @var RemovableTileStock|MockObject */
+    private $playerAStock;
+
+    /** @var RemovableTileStock|MockObject */
+    private $playerBStock;
+
+    protected function setUp(): void
+    {
+        $this->boardStock = $this->createMock(AppendableTileStock::class);
+        $this->playerAStock = $this->createMock(RemovableTileStock::class);
+        $this->playerBStock = $this->createMock(RemovableTileStock::class);
+
+        $stock = $this->createMock(RemovableTileStock::class);
+        $players = [
+            new Player('A', $this->playerAStock),
+            new Player('B', $this->playerBStock),
+        ];
+
+        $this->matchBoard = new MatchBoard($players, $stock, $this->boardStock);
+    }
+
+    /**
+     * @dataProvider playerInTurnDataset
+     */
+    public function testGetPlayerInTurn(int $round, string $name): void
+    {
+        while (--$round > 0) {
+            $this->matchBoard->getPayerInTurn();
+        }
+
+        $player = $this->matchBoard->getPayerInTurn();
+
+        $this->assertEquals($name, $player->getName());
+    }
+
+    public function playerInTurnDataset(): array
+    {
+        return [
+            'Round 1 => Player A' => ['round' => 1, 'name' => 'A'],
+            'Round 2 => Player B' => ['round' => 2, 'name' => 'B'],
+            'Round 3 => Player A' => ['round' => 3, 'name' => 'A'],
+            'Round 4 => Player B' => ['round' => 4, 'name' => 'B'],
+            'Round 5 => Player A' => ['round' => 5, 'name' => 'A'],
+            'Round 6 => Player B' => ['round' => 6, 'name' => 'B'],
+        ];
+    }
+
+    public function testGivenPlayedTilesThenReturnLeftFace(): void
+    {
+        $this->boardStock->method('getFirst')->willReturn(new Tile(1, 3));
+
+        $tile = $this->matchBoard->getFirstTile();
+
+        $this->assertEquals(1, $tile->getLeft());
+    }
+
+    public function testGivenPlayedTilesThenReturnRightFace(): void
+    {
+        $this->boardStock->method('getLast')->willReturn(new Tile(2, 6));
+
+        $tile = $this->matchBoard->getLastTile();
+
+        $this->assertEquals(6, $tile->getRight());
+    }
+
+    public function testGivenATileAndBoardIsEmptyThenAppendOnBoard(): void
+    {
+        $this->boardStock->method('isEmpty')->willReturn(true);
+
+        $this->boardStock->expects($this->once())->method('append');
+
+        $this->matchBoard->placeTile(new Tile(1, 2));
+    }
+
+    public function testGivenATileMatchedByLeftThenAppendOnStock(): void
+    {
+        $this->boardStock->method('getFirst')->willReturn(new Tile(1, 4));
+        $this->boardStock->method('getLast')->willReturn(new Tile(5, 5));
+
+        $this->boardStock->expects($this->once())->method('prepend');
+
+        $this->matchBoard->placeTile(new Tile(1, 2));
+    }
+
+    public function testGivenATileMatchedByRightThenAppendOnStock(): void
+    {
+        $this->boardStock->method('getFirst')->willReturn(new Tile(5, 5));
+        $this->boardStock->method('getLast')->willReturn(new Tile(1, 4));
+
+        $this->boardStock->expects($this->once())->method('append');
+
+        $this->matchBoard->placeTile(new Tile(2, 4));
+    }
+
+    public function testGivenATileMatchedByRightThenFlipAppendOnStock(): void
+    {
+        $this->boardStock->method('getFirst')->willReturn(new Tile(5, 5));
+        $this->boardStock->method('getLast')->willReturn(new Tile(1, 4));
+
+        $this->boardStock->expects($this->once())->method('append');
+
+        $this->matchBoard->placeTile(new Tile(4, 2));
+    }
+
+    public function testShouldGetPlayerAAsWinnerByPoints(): void
+    {
+        $this->playerAStock->method('sumPoints')->willReturn(6);
+        $this->playerBStock->method('sumPoints')->willReturn(9);
+
+        $winners = $this->matchBoard->getWinnerByPoints();
+
+        $expected = [new Player('A', $this->playerAStock)];
+        $this->assertEquals($expected, $winners);
+    }
+
+    public function testShouldGetPlayerAAndBAsWinnersBySamePointsAmount(): void
+    {
+        $this->playerAStock->method('sumPoints')->willReturn(5);
+        $this->playerBStock->method('sumPoints')->willReturn(5);
+
+        $winners = $this->matchBoard->getWinnerByPoints();
+
+        $expected = [new Player('A', $this->playerAStock), new Player('B', $this->playerBStock)];
+        $this->assertEquals($expected, $winners);
+    }
+}
