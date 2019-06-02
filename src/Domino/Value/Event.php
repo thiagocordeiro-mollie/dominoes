@@ -2,7 +2,9 @@
 
 namespace App\Domino\Value;
 
-class Event
+use JsonSerializable;
+
+class Event implements JsonSerializable
 {
     /** @var string */
     private $message;
@@ -33,5 +35,16 @@ class Event
     public function __toString(): string
     {
         return sprintf("<%s>%s<%s>", $this->type, $this->message, $this->type);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function jsonSerialize()
+    {
+        return [
+            'message' => $this->message,
+            'type' => $this->type,
+        ];
     }
 }
