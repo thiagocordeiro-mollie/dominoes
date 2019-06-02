@@ -20,4 +20,4 @@ jobs:
                   paths:
                       - ./vendor
 
-            - run: ./vendor/bin/phpunit --textdox
+            - run: ./vendor/bin/phpunit --testdox
