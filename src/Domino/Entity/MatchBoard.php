@@ -15,13 +15,13 @@ class MatchBoard
     private $stock;
 
     /** @var RemovableTileStock */
-    private $board;
+    private $boardStack;
 
     public function __construct(array $players, RemovableTileStock $stock, AppendableTileStock $board)
     {
         $this->players = $players;
         $this->stock = $stock;
-        $this->board = $board;
+        $this->boardStack = $board;
     }
 
     public function getPayerInTurn(): Player
@@ -33,14 +33,14 @@ class MatchBoard
         return $player;
     }
 
-    public function getFirst(): ?Tile
+    public function getFirstTile(): ?Tile
     {
-        return $this->board->getFirst();
+        return $this->boardStack->getFirst();
     }
 
-    public function getLast(): ?Tile
+    public function getLastTile(): ?Tile
     {
-        return $this->board->getLast();
+        return $this->boardStack->getLast();
     }
 
     public function giveTileToPlayer(Player $player): bool
@@ -60,18 +60,18 @@ class MatchBoard
         return true;
     }
 
-    public function place(Tile $tile): ?Tile
+    public function placeTile(Tile $tile): ?Tile
     {
-        if ($this->board->isEmpty()) {
-            $this->board->append($tile);
+        if ($this->boardStack->isEmpty()) {
+            $this->boardStack->append($tile);
             return null;
         }
 
-        $first = $this->getFirst();
-        $last = $this->getLast();
+        $first = $this->getFirstTile();
+        $last = $this->getLastTile();
 
         if ($tile->connectsOnRight($last->getRight())) {
-            $this->board->append($tile);
+            $this->boardStack->append($tile);
             return $last;
         }
 
@@ -79,7 +79,7 @@ class MatchBoard
             throw new Exception('Unable to place the tile');
         }
 
-        $this->board->prepend($tile);
+        $this->boardStack->prepend($tile);
 
         return $first;
     }
@@ -87,8 +87,8 @@ class MatchBoard
     /**
      * @return Tile[]
      */
-    public function getPlayed(): array
+    public function getPlayedTiles(): array
     {
-        return $this->board->getAll();
+        return $this->boardStack->getAll();
     }
 }

@@ -61,18 +61,18 @@ class MatchBoardTest extends TestCase
     {
         $this->boardStock->method('getFirst')->willReturn(new Tile(1, 3));
 
-        $face = $this->matchBoard->getFirst();
+        $tile = $this->matchBoard->getFirstTile();
 
-        $this->assertEquals(1, $face);
+        $this->assertEquals(1, $tile->getLeft());
     }
 
     public function testGivenPlayedTilesThenReturnRightFace(): void
     {
         $this->boardStock->method('getLast')->willReturn(new Tile(2, 6));
 
-        $face = $this->matchBoard->getLast();
+        $tile = $this->matchBoard->getLastTile();
 
-        $this->assertEquals(6, $face);
+        $this->assertEquals(6, $tile->getRight());
     }
 
     public function testGivenATileAndBoardIsEmptyThenAppendOnBoard(): void
@@ -81,7 +81,7 @@ class MatchBoardTest extends TestCase
 
         $this->boardStock->expects($this->once())->method('append');
 
-        $this->matchBoard->place(new Tile(1, 2));
+        $this->matchBoard->placeTile(new Tile(1, 2));
     }
 
     public function testGivenATileMatchedByLeftThenAppendOnStock(): void
@@ -91,7 +91,7 @@ class MatchBoardTest extends TestCase
 
         $this->boardStock->expects($this->once())->method('prepend');
 
-        $this->matchBoard->place(new Tile(1, 2));
+        $this->matchBoard->placeTile(new Tile(1, 2));
     }
 
     public function testGivenATileMatchedByRightThenAppendOnStock(): void
@@ -101,7 +101,7 @@ class MatchBoardTest extends TestCase
 
         $this->boardStock->expects($this->once())->method('append');
 
-        $this->matchBoard->place(new Tile(2, 4));
+        $this->matchBoard->placeTile(new Tile(2, 4));
     }
 
     public function testGivenATileMatchedByRightThenFlipAppendOnStock(): void
@@ -111,6 +111,6 @@ class MatchBoardTest extends TestCase
 
         $this->boardStock->expects($this->once())->method('append');
 
-        $this->matchBoard->place(new Tile(4, 2));
+        $this->matchBoard->placeTile(new Tile(4, 2));
     }
 }

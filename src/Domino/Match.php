@@ -4,6 +4,7 @@ namespace App\Domino;
 
 use App\Domino\Entity\MatchBoard;
 use App\Domino\Entity\Player;
+use App\Domino\Entity\Tile;
 use App\Domino\Value\Event;
 
 class Match
@@ -34,40 +35,26 @@ class Match
     {
         while (is_null($this->winner)) {
             $player = $this->matchBoard->getPayerInTurn();
-            $first = $this->matchBoard->getFirst();
-            $last = $this->matchBoard->getLast();
+            $first = $this->matchBoard->getFirstTile();
+            $last = $this->matchBoard->getLastTile();
 
             if (is_null($first) && is_null($last)) {
-                $tile = $player->getTile(null, null);
-                $this->matchBoard->place($tile);
-                $this->events[] = Event::message(sprintf(static::MSG_GAME_STARTED, $tile));
+                $this->registerFirstPlacement($player);
 
                 continue;
             }
 
-            $tile = $player->getTile($first->getLeft(), $last->getRight());
-
-            while (is_null($tile)) {
-                $given = $this->matchBoard->giveTileToPlayer($player);
-                if (!$given) {
-                    break;
-                }
-
-                $tile = $player->getTile($first->getLeft(), $last->getRight());
-            }
+            $tile = $this->getNextTile($player, $first->getLeft(), $last->getRight());
 
             if (!$tile) {
                 $this->events[] = Event::error(static::MSG_GAME_ENDED);
                 break;
             }
 
-            $paired = $this->matchBoard->place($tile);
-            $this->events[] = Event::message(sprintf(static::MSG_PLAYER_PLACE_TILE, $tile, $paired));
-            $this->events[] = Event::message(sprintf(static::MSG_BOARD_STATE, $this->getBoardState()));
+            $this->registerPlacement($tile);
 
             if ($player->isWinner()) {
-                $this->winner = $player;
-                $this->events[] = Event::success(sprintf(static::MSG_PLAYER_WON, $player->getName()));
+                $this->registerWinner($player);
             }
         }
 
@@ -76,6 +63,42 @@ class Match
 
     private function getBoardState(): string
     {
-        return implode(' ', $this->matchBoard->getPlayed());
+        return implode(' ', $this->matchBoard->getPlayedTiles());
+    }
+
+    private function getNextTile(Player $player, int $left, int $right): ?Tile
+    {
+        $tile = $player->getTile($left, $right);
+
+        while (is_null($tile)) {
+            $given = $this->matchBoard->giveTileToPlayer($player);
+            if (!$given) {
+                break;
+            }
+
+            $tile = $player->getTile($left, $right);
+        }
+
+        return $tile;
+    }
+
+    private function registerFirstPlacement(Player $player): void
+    {
+        $tile = $player->getTile(null, null);
+        $this->matchBoard->placeTile($tile);
+        $this->events[] = Event::message(sprintf(static::MSG_GAME_STARTED, $tile));
+    }
+
+    private function registerPlacement(?Tile $tile): void
+    {
+        $paired = $this->matchBoard->placeTile($tile);
+        $this->events[] = Event::message(sprintf(static::MSG_PLAYER_PLACE_TILE, $tile, $paired));
+        $this->events[] = Event::message(sprintf(static::MSG_BOARD_STATE, $this->getBoardState()));
+    }
+
+    private function registerWinner(Player $player): void
+    {
+        $this->winner = $player;
+        $this->events[] = Event::success(sprintf(static::MSG_PLAYER_WON, $player->getName()));
     }
 }
